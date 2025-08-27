@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Login = () => {
+// 1. Accept setUser as a prop
+const Login = ({ setUser }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -21,6 +22,8 @@ const Login = () => {
 
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
+        // 2. Update the state in App.jsx
+        setUser(response.data);
         navigate("/dashboard");
       }
     } catch (error) {
@@ -30,15 +33,15 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-96">
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
             name="email"
             placeholder="Enter your email"
-            className="w-full p-3 border rounded-lg"
+            className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
             value={formData.email}
             onChange={handleChange}
             required
@@ -47,7 +50,7 @@ const Login = () => {
             type="password"
             name="password"
             placeholder="Enter your password"
-            className="w-full p-3 border rounded-lg"
+            className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
             value={formData.password}
             onChange={handleChange}
             required

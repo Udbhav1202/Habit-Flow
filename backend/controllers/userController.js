@@ -38,6 +38,13 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         xp: user.xp,
+        streak: {
+          type: Number,
+          default: 0,
+        },
+        lastCompletedForStreak: {
+          type: Date,
+        },
         token: generateToken(user._id),
       });
     } else {
@@ -65,6 +72,13 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         xp: user.xp,
+        streak: {
+          type: Number,
+          default: 0,
+        },
+        lastCompletedForStreak: {
+          type: Date,
+        },
         token: generateToken(user._id),
       });
     } else {

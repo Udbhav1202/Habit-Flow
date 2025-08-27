@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-function Dashboard() {
+// 1. Accept setUser as a prop
+function Dashboard({ setUser }) {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
@@ -50,32 +51,33 @@ function Dashboard() {
     }
   };
   
-  // NEW: Function to toggle task completion
   const handleToggleComplete = async (task) => {
     const token = getToken();
     const config = { headers: { Authorization: `Bearer ${token}` } };
     try {
       const updatedTask = await axios.put(
         API_URL + task._id,
-        { completed: !task.completed }, // Send the opposite of the current status
+        { completed: !task.completed },
         config
       );
       setTasks(
         tasks.map((t) => (t._id === task._id ? updatedTask.data : t))
       );
-      // --- ADD THIS ENTIRE BLOCK ---
-      // It checks if a task was just completed and updates the XP
+
+      // 2. This is the new, improved logic for updating global state
       if (updatedTask.data.completed) {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-          user.xp = (user.xp || 0) + 10;
-          localStorage.setItem('user', JSON.stringify(user));
-          // This line is a simple way to tell other components (like the Header)
-          // that the user data has changed.
-          window.dispatchEvent(new Event('storage'));
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        if (currentUser) {
+          // Note: We are now also updating the streak in the local object
+          const updatedUser = { 
+            ...currentUser, 
+            xp: (currentUser.xp || 0) + 10,
+            streak: currentUser.streak // This will be updated on the next login
+          };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          setUser(updatedUser); // This updates the state in App.jsx!
         }
       }
-      // -----------------------------
     } catch (err) {
         console.error('Failed to update task:', err);
     }
@@ -93,23 +95,23 @@ function Dashboard() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10">
+    <div className="max-w-2xl mx-auto mt-10 text-white">
       <h1 className="text-3xl font-bold text-center mb-4">
         Your 3 Tasks for Today
       </h1>
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-md">
         <form onSubmit={handleAddTask} className="flex gap-2 mb-4">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's your next quest?"
-            className="flex-grow p-3 border rounded-lg"
+            className="flex-grow p-3 border rounded-lg bg-gray-700 border-gray-600"
             disabled={tasks.length >= 3}
           />
           <button
             type="submit"
-            className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+            className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 disabled:bg-gray-500"
             disabled={tasks.length >= 3}
           >
             Add Task
@@ -121,7 +123,7 @@ function Dashboard() {
           {tasks.map((task) => (
             <div
               key={task._id}
-              className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
+              className="flex items-center justify-between bg-gray-700 p-3 rounded-lg"
             >
               <div className="flex items-center gap-3">
                 <input
@@ -132,7 +134,7 @@ function Dashboard() {
                 />
                 <span
                   className={`text-lg ${
-                    task.completed ? 'line-through text-gray-400' : ''
+                    task.completed ? 'line-through text-gray-500' : ''
                   }`}
                 >
                   {task.title}

@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Signup = () => {
+// 1. Accept setUser as a prop
+const Signup = ({ setUser }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -20,30 +21,24 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // The API endpoint on your Node.js server
       const API_URL = "/api/users/register";
-
-      // Send a POST request to the backend
       const response = await axios.post(API_URL, formData);
 
-      // If the request is successful (status 201)
       if (response.data) {
-        // Store user info and token in local storage
         localStorage.setItem("user", JSON.stringify(response.data));
-        
-        // Redirect to the dashboard
+        // 2. Update the state in App.jsx
+        setUser(response.data);
         navigate("/dashboard");
       }
     } catch (error) {
-      // Handle errors (e.g., user already exists)
       console.error("Signup failed:", error.response.data.message);
       alert(`Signup failed: ${error.response.data.message}`);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-96">
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -51,7 +46,7 @@ const Signup = () => {
               type="text"
               name="name"
               placeholder="Enter your name"
-              className="w-full p-3 border rounded-lg"
+              className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
               value={formData.name}
               onChange={handleChange}
               required
@@ -62,7 +57,7 @@ const Signup = () => {
               type="email"
               name="email"
               placeholder="Enter your email"
-              className="w-full p-3 border rounded-lg"
+              className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
               value={formData.email}
               onChange={handleChange}
               required
@@ -73,7 +68,7 @@ const Signup = () => {
               type="password"
               name="password"
               placeholder="Create a password (min 6 characters)"
-              className="w-full p-3 border rounded-lg"
+              className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
               value={formData.password}
               onChange={handleChange}
               required
