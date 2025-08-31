@@ -48,29 +48,64 @@ const updateTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-
-    // Ensure the logged-in user owns the task
     if (task.user.toString() !== req.user.id) {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    // Check if the task is being marked as complete for the first time
     const isCompletingTask = req.body.completed && !task.completed;
 
-    const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    const updatedTask = await Task.findByIdAndUpdate(id, req.body, { new: true });
 
-    // If the task was just completed, award XP
+    let updatedUser = await User.findById(req.user.id);
+
     if (isCompletingTask) {
-      await User.findByIdAndUpdate(req.user.id, { $inc: { xp: 10 } });
+      const today = new Date();
+      let streak = updatedUser.streak || 0;
+      const lastCompleted = updatedUser.lastCompletedForStreak;
+
+      // Helper function to check if two dates are the same calendar day
+      const isSameDay = (d1, d2) => {
+        return d1.getFullYear() === d2.getFullYear() &&
+               d1.getMonth() === d2.getMonth() &&
+               d1.getDate() === d2.getDate();
+      };
+
+      if (lastCompleted) {
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        // If the last completion was yesterday, increment the streak
+        if (isSameDay(lastCompleted, yesterday)) {
+          streak++;
+        } 
+        // If the last completion was NOT today, reset the streak
+        else if (!isSameDay(lastCompleted, today)) {
+          streak = 1;
+        }
+        // If it was today, do nothing to the streak
+
+      } else {
+        // This is the first task ever completed
+        streak = 1;
+      }
+
+      // Update user and fetch the very latest version
+      updatedUser = await User.findByIdAndUpdate(req.user.id, {
+        $inc: { xp: 10 },
+        streak: streak,
+        lastCompletedForStreak: new Date(),
+      }, { new: true });
     }
 
-    res.status(200).json(updatedTask);
+    // Send back the updated task AND the updated user
+    res.status(200).json({ updatedTask, updatedUser });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // @desc    Delete a task
 // @route   DELETE /api/tasks/:id

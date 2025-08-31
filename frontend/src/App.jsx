@@ -1,12 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
+
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Rewards from "./pages/Rewards"; 
 import Header from "./components/Header";
 import PrivateRoute from "./components/PrivateRoute";
-import Rewards from "./pages/Rewards";
+
+import './App.css'
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,11 +27,12 @@ function App() {
       <Header user={user} setUser={setUser} />
       <main className="p-4">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/signup" element={<Signup setUser={setUser} />} />
           
-          {/* All protected routes go inside this single PrivateRoute wrapper */}
+          {/* This is the correct way to protect multiple routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<Dashboard setUser={setUser} />} />
             <Route path="/rewards" element={<Rewards user={user} setUser={setUser} />} />

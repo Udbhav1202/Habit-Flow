@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// 1. Accept setUser as a prop
 const Signup = ({ setUser }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -26,7 +25,6 @@ const Signup = ({ setUser }) => {
 
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
-        // 2. Update the state in App.jsx
         setUser(response.data);
         navigate("/dashboard");
       }
@@ -37,16 +35,16 @@ const Signup = ({ setUser }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
+    <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 100px)' }}>
+      <div className="bg-white p-8 rounded-xl shadow-md w-96">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Create Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <input
               type="text"
               name="name"
               placeholder="Enter your name"
-              className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.name}
               onChange={handleChange}
               required
@@ -57,7 +55,7 @@ const Signup = ({ setUser }) => {
               type="email"
               name="email"
               placeholder="Enter your email"
-              className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.email}
               onChange={handleChange}
               required
@@ -68,7 +66,7 @@ const Signup = ({ setUser }) => {
               type="password"
               name="password"
               placeholder="Create a password (min 6 characters)"
-              className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={formData.password}
               onChange={handleChange}
               required
@@ -76,7 +74,7 @@ const Signup = ({ setUser }) => {
           </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+            className="w-full bg-blue-600 text-white font-semibold p-3 rounded-lg hover:bg-blue-700"
           >
             Sign Up
           </button>

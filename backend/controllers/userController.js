@@ -37,14 +37,9 @@ const registerUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        xp: user.xp,
-        streak: {
-          type: Number,
-          default: 0,
-        },
-        lastCompletedForStreak: {
-          type: Date,
-        },
+        xp: user.xp || 0,
+        streak: user.streak || 0,
+        lastCompletedForStreak: user.lastCompletedForStreak,
         token: generateToken(user._id),
       });
     } else {
@@ -71,14 +66,9 @@ const loginUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        xp: user.xp,
-        streak: {
-          type: Number,
-          default: 0,
-        },
-        lastCompletedForStreak: {
-          type: Date,
-        },
+        xp: user.xp || 0,
+        streak: user.streak || 0,
+        lastCompletedForStreak: user.lastCompletedForStreak,
         token: generateToken(user._id),
       });
     } else {

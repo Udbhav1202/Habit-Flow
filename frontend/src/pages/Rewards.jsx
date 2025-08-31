@@ -72,7 +72,6 @@ function Rewards({ user, setUser }) {
     }
   };
 
-  // NEW: Function to handle deleting a reward
   const handleDeleteReward = async (id) => {
     if (window.confirm('Are you sure you want to delete this reward?')) {
         const token = getToken();
@@ -87,51 +86,56 @@ function Rewards({ user, setUser }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 text-white">
-      <h1 className="text-3xl font-bold text-center mb-4">Your Custom Rewards</h1>
+    <div className="max-w-xl mx-auto mt-8">
+      <h1 className="text-4xl font-bold text-center mb-6 text-gray-800">Your Custom Rewards</h1>
       
-      <div className="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-2xl font-bold mb-4">Create a New Reward</h2>
+      <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">Create a New Reward</h2>
         <form onSubmit={handleAddReward} className="space-y-4">
           <input
-            type="text" name="title" value={newReward.title} onChange={handleInputChange}
+            type="text"
+            name="title"
+            value={newReward.title}
+            onChange={handleInputChange}
             placeholder="Reward Title (e.g., Watch a movie)"
-            className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
           <input
-            type="number" name="cost" value={newReward.cost} onChange={handleInputChange}
+            type="number"
+            name="cost"
+            value={newReward.cost}
+            onChange={handleInputChange}
             placeholder="XP Cost (e.g., 50)"
-            className="w-full p-3 border rounded-lg bg-gray-700 border-gray-600"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
           {error && <p className="text-red-500 text-center">{error}</p>}
-          <button type="submit" className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600">
+          <button type="submit" className="w-full bg-green-600 text-white font-semibold p-3 rounded-lg hover:bg-green-700">
             Add Reward
           </button>
         </form>
       </div>
 
-      <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Redeem Rewards</h2>
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">Redeem Rewards</h2>
         <div className="space-y-3">
           {rewards.length > 0 ? (
             rewards.map((reward) => (
-              <div key={reward._id} className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
+              <div key={reward._id} className="flex items-center justify-between bg-gray-100 p-4 rounded-lg">
                 <div>
-                  <p className="text-lg">{reward.title}</p>
-                  <p className="text-sm text-green-400">{reward.cost} XP</p>
+                  <p className="text-lg text-gray-800">{reward.title}</p>
+                  <p className="text-sm text-green-600 font-semibold">{reward.cost} XP</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleRedeem(reward)}
                     disabled={!user || user.xp < reward.cost}
-                    className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     Redeem
                   </button>
-                  {/* Add the delete button */}
                   <button
                     onClick={() => handleDeleteReward(reward._id)}
-                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
+                    className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
                   >
                     Delete
                   </button>
