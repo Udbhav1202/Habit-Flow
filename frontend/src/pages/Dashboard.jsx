@@ -10,7 +10,7 @@ const Dashboard = ({ setUser }) => {
   const [editText, setEditText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  const API_URL = "/api/tasks/";
+
 
   const getToken = () => {
     const user = JSON.parse(localStorage.getItem("user"));
