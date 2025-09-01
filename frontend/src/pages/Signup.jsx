@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/tasks/`;
 
 const Signup = ({ setUser }) => {
   const [formData, setFormData] = useState({
@@ -21,7 +20,7 @@ const Signup = ({ setUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_URL = "/api/users/register";
+      const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/register`;
       const response = await axios.post(API_URL, formData);
 
       if (response.data) {
