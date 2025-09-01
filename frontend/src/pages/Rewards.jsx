@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/tasks/`;
 
 function Rewards({ user, setUser }) {
   const [rewards, setRewards] = useState([]);
   const [newReward, setNewReward] = useState({ title: '', cost: '' });
   const [error, setError] = useState('');
 
-  const API_URL = '/api/rewards/';
+  const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/rewards/`;
 
   const getToken = () => {
     const userFromStorage = JSON.parse(localStorage.getItem('user'));

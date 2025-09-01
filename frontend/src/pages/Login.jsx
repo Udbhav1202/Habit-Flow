@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/tasks/`;
 import axios from "axios";
 
 const Login = ({ setUser }) => {
@@ -17,7 +16,7 @@ const Login = ({ setUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_URL = "/api/users/login";
+      const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/login`;
       const response = await axios.post(API_URL, formData);
 
       if (response.data) {
