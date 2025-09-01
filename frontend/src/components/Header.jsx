@@ -16,7 +16,7 @@ const Header = ({ user, setUser }) => {
   return (
     <header className="bg-white shadow-sm p-3 sm:p-4 flex justify-between items-center relative">
       <div className="text-xl font-bold">
-        <Link to={homeLink} className="text-gray-800">TaskQuest</Link>
+        <Link to={homeLink} className="text-gray-800">HabitFlow</Link>
       </div>
       <nav>
         {/* Desktop Menu */}

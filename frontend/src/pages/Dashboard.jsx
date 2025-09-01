@@ -45,11 +45,11 @@ const Dashboard = ({ setUser }) => {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (tasks.filter(t => !t.completed).length >= 3) {
-      setError('You can only have 3 active tasks. Complete one first!');
+      setError('You can only have 3 active habits. Complete one first!');
       return;
     }
     if (!title) {
-        setError("Please enter a task title.");
+        setError("Please enter a habit title.");
         return;
     }
     
@@ -64,7 +64,7 @@ const Dashboard = ({ setUser }) => {
         setError('');
     } catch (err) {
         console.error('Failed to add task:', err);
-        setError('Failed to add task. Please try again.');
+        setError('Failed to add habit. Please try again.');
     } finally {
         setIsAddingTask(false);
     }
@@ -108,7 +108,7 @@ const Dashboard = ({ setUser }) => {
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (window.confirm("Are you sure you want to delete this quest?")) {
+    if (window.confirm("Are you sure you want to delete this habit?")) {
         const token = getToken();
         const config = { headers: { Authorization: `Bearer ${token}` } };
         try {
@@ -146,7 +146,7 @@ const Dashboard = ({ setUser }) => {
             
             <div className="space-y-3 mt-4">
                  {isLoading ? (
-                    <p className="text-center text-gray-500">Loading quests...</p>
+                                         <p className="text-center text-gray-500">Loading habits...</p>ned
                  ) : tasks.length > 0 ? (
                     tasks.map((task) => (
                                                  <div key={task._id} className="flex items-center justify-between bg-gray-50 p-3 sm:p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 group">
@@ -197,7 +197,7 @@ const Dashboard = ({ setUser }) => {
                         </div>
                     ))
                 ) : (
-                    <p className="text-center text-gray-500 py-4">No quests for today. Add your first one!</p>
+                                         <p className="text-center text-gray-500 py-4">No habits for today. Add your first one!</p>
                 )}
             </div>
         </div>
