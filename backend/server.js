@@ -17,6 +17,7 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   'http://localhost:5173', 
   'https://habit-flow-rho.vercel.app',
+  'https://habit-flow-cn9jnzqkq-udbhav1202s-projects.vercel.app',
   process.env.FRONTEND_URL // Add this to your environment variables
 ];
 
