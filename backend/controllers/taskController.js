@@ -132,4 +132,21 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = { getTasks, addTask, updateTask, deleteTask };
+const clearCompletedTasks = async (req,res) => {
+  try{
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    await Task.deleteMany({
+      user: req.user.id,
+      completed: true,
+      createdAt: {$lt: today}
+    });
+
+    res.status(200).json({ message: "Old completed tasks cleared "});
+  }catch(error){
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getTasks, addTask, updateTask, deleteTask, clearCompletedTasks };

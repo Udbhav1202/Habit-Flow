@@ -1,18 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const { 
-  addTask, 
   getTasks, 
+  addTask, 
   updateTask, 
-  deleteTask 
+  deleteTask, 
+  clearCompletedTasks 
 } = require("../controllers/taskController");
-const { protect } = require('../middleware/authMiddleware'); // 1. Import the middleware
+const { protect } = require("../middleware/authMiddleware");
 
-// 2. Add the 'protect' middleware to each route
-// This ensures only logged-in users can access these endpoints
-router.post("/", protect, addTask);
-router.get("/", protect, getTasks);
-router.put("/:id", protect, updateTask);
-router.delete("/:id", protect, deleteTask); // Corrected from .put to .delete
+// Get and Add tasks
+router.route("/").get(protect, getTasks).post(protect, addTask);
+
+// Route to clear old completed tasks
+router.route("/clear-completed").post(protect, clearCompletedTasks);
+
+// Update and Delete a specific task
+router.route("/:id").put(protect, updateTask).delete(protect, deleteTask);
 
 module.exports = router;
+

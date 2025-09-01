@@ -1,25 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-function Dashboard({ setUser }) {
+const Dashboard = ({ setUser }) => {
   const [tasks, setTasks] = useState([]);
-  const [title, setTitle] = useState('');
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState("");
+  const [error, setError] = useState("");
+  const [editingTask, setEditingTask] = useState(null);
+  const [editText, setEditText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  
-  // State to manage which task is being edited
-  const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editedTitle, setEditedTitle] = useState('');
 
-  const API_URL = '/api/tasks/';
+  const API_URL = "/api/tasks/";
 
   const getToken = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem("user"));
     return user ? user.token : null;
   };
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const initDashboard = async () => {
       setIsLoading(true);
       const token = getToken();
       if (!token) {
@@ -27,36 +25,39 @@ function Dashboard({ setUser }) {
         return;
       }
       const config = { headers: { Authorization: `Bearer ${token}` } };
+      
       try {
+        await axios.post(`${API_URL}clear-completed`, {}, config);
         const response = await axios.get(API_URL, config);
         setTasks(response.data);
       } catch (err) {
-        console.error('Failed to fetch tasks:', err);
+        console.error("Failed to initialize dashboard:", err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-    fetchTasks();
+    initDashboard();
   }, []);
 
   const handleAddTask = async (e) => {
     e.preventDefault();
-    if (tasks.length >= 3) {
-      setError('You can only have 3 tasks per day. Focus!');
+    if (tasks.filter(t => !t.completed).length >= 3) {
+      setError('You can only have 3 active tasks. Complete one first!');
       return;
     }
     if (!title) {
-      setError('Please enter a task title.');
-      return;
+        setError("Please enter a task title.");
+        return;
     }
     const token = getToken();
     const config = { headers: { Authorization: `Bearer ${token}` } };
     try {
-      const response = await axios.post(API_URL, { title }, config);
-      setTasks([...tasks, response.data]);
-      setTitle('');
-      setError('');
+        const response = await axios.post(API_URL, { title }, config);
+        setTasks([...tasks, response.data]);
+        setTitle('');
+        setError('');
     } catch (err) {
-      console.error('Failed to add task:', err);
+        console.error('Failed to add task:', err);
     }
   };
   
@@ -83,111 +84,115 @@ function Dashboard({ setUser }) {
     }
   };
 
-  // --- NEW --- Function to start editing a task
-  const startEditing = (task) => {
-    setEditingTaskId(task._id);
-    setEditedTitle(task.title);
-  };
-
-  // --- NEW --- Function to cancel editing
-  const cancelEditing = () => {
-    setEditingTaskId(null);
-    setEditedTitle('');
-  };
-
-  // --- NEW --- Function to save the edited task title
-  const handleUpdateTitle = async (taskId) => {
+  const handleEditTask = async (taskId) => {
     const token = getToken();
     const config = { headers: { Authorization: `Bearer ${token}` } };
     try {
-      const response = await axios.put(API_URL + taskId, { title: editedTitle }, config);
-      const { updatedTask } = response.data;
-      setTasks(tasks.map(task => task._id === taskId ? updatedTask : task));
-      cancelEditing(); // Exit editing mode
+        const response = await axios.put(API_URL + taskId, { title: editText }, config);
+        const { updatedTask } = response.data;
+        setTasks(tasks.map(task => task._id === taskId ? updatedTask : task));
+        setEditingTask(null);
+        setEditText('');
     } catch (err) {
-      console.error('Failed to update task title:', err);
+        console.error('Failed to update task title:', err);
     }
   };
 
+  const handleDeleteTask = async (taskId) => {
+    if (window.confirm("Are you sure you want to delete this quest?")) {
+        const token = getToken();
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        try {
+            await axios.delete(API_URL + taskId, config);
+            setTasks(tasks.filter((task) => task._id !== taskId));
+        } catch (err) {
+            console.error("Failed to delete task:", err);
+        }
+    }
+  };
+
+
   return (
-    <div className="max-w-xl mx-auto mt-8">
-      <h1 className="text-4xl font-bold text-center mb-6 text-gray-800">
-        Today's Quests
-      </h1>
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <form onSubmit={handleAddTask} className="flex gap-3 mb-4">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="What's your next quest?"
-            className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300"
-            disabled={tasks.length >= 3}
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white font-semibold px-5 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-300"
-          >
-            Add
-          </button>
-        </form>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        
-        <div className="space-y-3">
-          {isLoading ? (
-            <p className="text-center text-gray-500">Loading quests...</p>
-          ) : tasks.length > 0 ? (
-            tasks.map((task) => (
-              <div
-                key={task._id} 
-                className="flex items-center justify-between bg-gray-100 p-4 rounded-lg group"
-              >
-                {editingTaskId === task._id ? (
-                  // --- EDITING VIEW ---
-                  <div className="flex-grow flex items-center gap-2">
-                    <input 
-                      type="text"
-                      value={editedTitle}
-                      onChange={(e) => setEditedTitle(e.target.value)}
-                      className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                    <button onClick={() => handleUpdateTitle(task._id)} className="bg-green-600 text-white font-semibold px-3 py-2 rounded-lg hover:bg-green-700">Save</button>
-                    <button onClick={cancelEditing} className="bg-gray-200 text-gray-700 font-semibold px-3 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
-                  </div>
+    <div className="max-w-xl mx-auto mt-8 p-4">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Today's Quests</h1>
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+            <form onSubmit={handleAddTask} className="flex gap-3 mb-4">
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="What's your next quest?"
+                    className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300"
+                    disabled={tasks.filter(t => !t.completed).length >= 3}
+                />
+                <button
+                    type="submit"
+                    className="bg-blue-600 text-white font-semibold px-5 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-300"
+                    disabled={tasks.filter(t => !t.completed).length >= 3}
+                >
+                    Add
+                </button>
+            </form>
+            {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+            
+            <div className="space-y-3 mt-4">
+                 {isLoading ? (
+                    <p className="text-center text-gray-500">Loading quests...</p>
+                 ) : tasks.length > 0 ? (
+                    tasks.map((task) => (
+                        <div key={task._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 group">
+                            {editingTask === task._id ? (
+                                // Edit Mode View
+                                <div className="flex-grow flex items-center gap-2">
+                                    <input 
+                                        type="text"
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                        className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        autoFocus
+                                    />
+                                    <button onClick={() => handleEditTask(task._id)} className="bg-green-600 text-white font-semibold px-3 py-2 rounded-lg hover:bg-green-700">Save</button>
+                                    <button onClick={() => setEditingTask(null)} className="bg-gray-200 text-gray-700 font-semibold px-3 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                                </div>
+                            ) : (
+                                // Normal View
+                                <>
+                                    <div className="flex items-center gap-4 flex-grow">
+                                        <input
+                                            type="checkbox"
+                                            checked={task.completed}
+                                            onChange={() => handleToggleComplete(task)}
+                                            className="h-6 w-6 accent-green-500 cursor-pointer"
+                                        />
+                                        <span className={`text-lg ${task.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                                            {task.title}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <button onClick={() => { setEditingTask(task._id); setEditText(task.title); }} className="text-gray-400 hover:text-blue-600 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                                <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        <button onClick={() => handleDeleteTask(task._id)} className="text-gray-400 hover:text-red-600 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ))
                 ) : (
-                  // --- NORMAL VIEW ---
-                  <>
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="checkbox"
-                        checked={task.completed}
-                        onChange={() => handleToggleComplete(task)}
-                        className="h-6 w-6 accent-green-500 cursor-pointer"
-                      />
-                      <span className={`text-lg ${task.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                        {task.title}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => startEditing(task)}
-                      className="text-gray-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition-all duration-300"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                        <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </>
+                    <p className="text-center text-gray-500 py-4">No quests for today. Add your first one!</p>
                 )}
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 py-4">No quests for today. Add your first one!</p>
-          )}
+            </div>
         </div>
-      </div>
     </div>
   );
-}
+};
 
 export default Dashboard;
+
