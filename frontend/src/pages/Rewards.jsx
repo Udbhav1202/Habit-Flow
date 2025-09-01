@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/tasks/`;
 
 function Rewards({ user, setUser }) {
   const [rewards, setRewards] = useState([]);

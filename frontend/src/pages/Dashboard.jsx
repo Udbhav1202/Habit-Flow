@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/api/tasks/`;
 import axios from "axios";
 
 const Dashboard = ({ setUser }) => {
