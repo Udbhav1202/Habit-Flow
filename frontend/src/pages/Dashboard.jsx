@@ -146,7 +146,7 @@ const Dashboard = ({ setUser }) => {
             
             <div className="space-y-3 mt-4">
                  {isLoading ? (
-                                         <p className="text-center text-gray-500">Loading habits...</p>ned
+                                         <p className="text-center text-gray-500">Loading habits...</p>
                  ) : tasks.length > 0 ? (
                     tasks.map((task) => (
                                                  <div key={task._id} className="flex items-center justify-between bg-gray-50 p-3 sm:p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 group">
