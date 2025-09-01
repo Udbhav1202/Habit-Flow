@@ -60,3 +60,117 @@ Ensure you have the following installed:
 ```bash
 git clone <your-repository-url>
 cd <your-project-folder>
+
+###Step 2: Install Dependencies
+```Backend
+cd backend
+npm install
+
+```Frontend
+cd ../frontend
+npm install
+
+###Step 3: Configure Environment Variables
+```Backend – Create a .env file in the backend folder:
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+
+```Frontend – Create a .env file in the frontend folder:
+VITE_API_URL=http://localhost:3000
+
+###Step 4: Run the Application
+Start Backend Server
+
+From the backend directory:
+
+node server.js
+
+Start Frontend Dev Server
+
+From the frontend directory:
+
+npm run dev
+
+🔗 App will be available at:
+
+Frontend: http://localhost:5173
+
+Backend API: http://localhost:3000
+
+🧩 Project Structure
+habitflow/
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── server.js
+│   └── .env
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── vite.config.js
+│   └── .env
+├── README.md
+└── package.json
+
+🧠 Troubleshooting Tips
+
+If deployment fails with:
+
+bash: nodemon: command not found
+Exited with status 127
+
+
+Do the following:
+
+Change the backend start script in backend/package.json to use node:
+
+"scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+}
+
+
+Make sure your .env files are correctly set up.
+
+Ensure MongoDB is running locally or update your MONGO_URI to a cloud-hosted database.
+
+🙌 Contributing
+
+Contributions are welcome! If you'd like to fix a bug or add a feature:
+
+Fork the repository
+
+Create a new branch (git checkout -b feature-name)
+
+Make your changes
+
+Commit and push
+
+Submit a pull request
+
+📄 License
+
+This project is licensed under the MIT License
+.
+
+👨‍💻 Author
+
+Built with ❤️ by [Your Name]
+
+
+---
+
+### ✅ Final Reminder:
+
+Before saving:
+- Replace `<your-repository-url>` with your actual GitHub repo link
+- Replace `[Your Name]` with your actual name or GitHub profile
+- Ensure `.env` files are not committed (add to `.gitignore`)
+
+Let me know if you'd like to include:
+- Screenshots or a demo GIF
+- GitHub badges
+- Deployment instructions (e.g., Vercel + Render setup guide)
+
+You're all set to ship a great README! 🚀
