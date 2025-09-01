@@ -18,6 +18,9 @@ const allowedOrigins = [
   'http://localhost:5173', 
   'https://habit-flow-rho.vercel.app',
   'https://habit-flow-cn9jnzqkq-udbhav1202s-projects.vercel.app',
+  'https://habit-flow-git-main-udbhav1202s-projects.vercel.app',
+  // Allow all Vercel preview domains
+  /^https:\/\/habit-flow.*\.vercel\.app$/,
   process.env.FRONTEND_URL // Add this to your environment variables
 ];
 
@@ -26,12 +29,20 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
+    // Check if origin is in allowedOrigins array
     if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('Blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    
+    // Check if origin matches any regex patterns
+    for (let pattern of allowedOrigins) {
+      if (pattern instanceof RegExp && pattern.test(origin)) {
+        return callback(null, true);
+      }
+    }
+    
+    console.log('Blocked origin:', origin);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   optionsSuccessStatus: 200
