@@ -51,43 +51,52 @@ const updateTask = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    const isCompletingTask = req.body.completed && !task.completed;
+    // --- NEW LOGIC TO CHECK IF XP SHOULD BE AWARDED ---
+    // This is only true if the request is to complete the task AND xp has NOT been awarded yet.
+    const shouldAwardXp = req.body.completed && !task.xpAwarded;
 
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
+    const updatePayload = { ...req.body };
+    // If we're awarding XP, permanently mark this task as having awarded XP.
+    if (shouldAwardXp) {
+      updatePayload.xpAwarded = true;
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id, updatePayload, {
       new: true,
     });
 
-    if (isCompletingTask) {
+    // --- ONLY RUN GAMIFICATION IF XP SHOULD BE AWARDED ---
+    if (shouldAwardXp) {
       const user = await User.findById(req.user.id);
       let updatedStreak = user.streak;
       
       const today = new Date();
       const lastCompleted = user.lastCompletedForStreak || new Date(0);
 
-     
+      // Normalize both dates to midnight UTC to compare calendar days
       const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
       const lastCompletedUTC = new Date(Date.UTC(lastCompleted.getUTCFullYear(), lastCompleted.getUTCMonth(), lastCompleted.getUTCDate()));
       
-      const oneDay = 24 * 60 * 60 * 1000; 
+      const oneDay = 24 * 60 * 60 * 1000; // Milliseconds in a day
       const diffDays = Math.round((todayUTC - lastCompletedUTC) / oneDay);
 
-      if (diffDays > 0) { 
+      if (diffDays > 0) { // Only update if it's a new day
         if (diffDays === 1) {
-          
+          // It was exactly yesterday, continue the streak
           updatedStreak++;
         } else {
-          
+          // It was more than one day ago, reset streak to 1
           updatedStreak = 1;
         }
       }
-  
+      // If diffDays is 0, it's the same day, so the streak does not change.
 
       const updatedUser = await User.findByIdAndUpdate(
         req.user.id,
         {
           $inc: { xp: 10 },
           streak: updatedStreak,
-          lastCompletedForStreak: today, 
+          lastCompletedForStreak: today, // Always store the current full timestamp
         },
         { new: true }
       );
@@ -95,13 +104,12 @@ const updateTask = async (req, res) => {
       return res.status(200).json({ updatedTask, updatedUser });
     }
 
+    // If no XP was awarded, just send back the updated task
     res.status(200).json({ updatedTask });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 
 const deleteTask = async (req, res) => {
