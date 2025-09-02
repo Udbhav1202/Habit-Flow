@@ -42,64 +42,60 @@ const addTask = async (req, res) => {
 // @access  Private
 const updateTask = async (req, res) => {
   try {
-    const { id } = req.params;
-    const task = await Task.findById(id);
+    const task = await Task.findById(req.params.id);
 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
     if (task.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: "User not authorized" });
+      return res.status(401).json({ message: "Not authorized" });
     }
 
     const isCompletingTask = req.body.completed && !task.completed;
 
-    const updatedTask = await Task.findByIdAndUpdate(id, req.body, { new: true });
-
-    let updatedUser = await User.findById(req.user.id);
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     if (isCompletingTask) {
+      const user = await User.findById(req.user.id);
+      let updatedStreak = user.streak;
+      
       const today = new Date();
-      let streak = updatedUser.streak || 0;
-      const lastCompleted = updatedUser.lastCompletedForStreak;
+      const lastCompleted = user.lastCompletedForStreak || new Date(0);
 
-      // Helper function to check if two dates are the same calendar day
-      const isSameDay = (d1, d2) => {
-        return d1.getFullYear() === d2.getFullYear() &&
-               d1.getMonth() === d2.getMonth() &&
-               d1.getDate() === d2.getDate();
-      };
+     
+      const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+      const lastCompletedUTC = new Date(Date.UTC(lastCompleted.getUTCFullYear(), lastCompleted.getUTCMonth(), lastCompleted.getUTCDate()));
+      
+      const oneDay = 24 * 60 * 60 * 1000; 
+      const diffDays = Math.round((todayUTC - lastCompletedUTC) / oneDay);
 
-      if (lastCompleted) {
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-
-        // If the last completion was yesterday, increment the streak
-        if (isSameDay(lastCompleted, yesterday)) {
-          streak++;
-        } 
-        // If the last completion was NOT today, reset the streak
-        else if (!isSameDay(lastCompleted, today)) {
-          streak = 1;
+      if (diffDays > 0) { 
+        if (diffDays === 1) {
+          
+          updatedStreak++;
+        } else {
+          
+          updatedStreak = 1;
         }
-        // If it was today, do nothing to the streak
-
-      } else {
-        // This is the first task ever completed
-        streak = 1;
       }
+  
 
-      // Update user and fetch the very latest version
-      updatedUser = await User.findByIdAndUpdate(req.user.id, {
-        $inc: { xp: 10 },
-        streak: streak,
-        lastCompletedForStreak: new Date(),
-      }, { new: true });
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $inc: { xp: 10 },
+          streak: updatedStreak,
+          lastCompletedForStreak: today, 
+        },
+        { new: true }
+      );
+      
+      return res.status(200).json({ updatedTask, updatedUser });
     }
 
-    // Send back the updated task AND the updated user
-    res.status(200).json({ updatedTask, updatedUser });
-
+    res.status(200).json({ updatedTask });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -107,9 +103,7 @@ const updateTask = async (req, res) => {
 
 
 
-// @desc    Delete a task
-// @route   DELETE /api/tasks/:id
-// @access  Private
+
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,7 +118,7 @@ const deleteTask = async (req, res) => {
         return res.status(401).json({ message: "User not authorized" });
     }
 
-    await task.deleteOne(); // Use deleteOne() instead of remove()
+    await task.deleteOne(); 
 
     res.status(200).json({ id: id, message: "Task removed" });
   } catch (error) {
